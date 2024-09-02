@@ -1,0 +1,8 @@
+# @package _global_
+---
+dataset:
+  path: pipelines/pdb_processing/data/dataset_high_split.parquet  # Define Path
+  y_features: ['log_affinity_data']
+  smiles_column:  canonical_smiles
+  ligand_mol_column: ligand_bytes
+  receptor_path_column: protein_path

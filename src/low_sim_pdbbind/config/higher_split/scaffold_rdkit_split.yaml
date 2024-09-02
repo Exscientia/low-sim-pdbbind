@@ -1,0 +1,11 @@
+# @package _global_
+---
+
+higher_split:
+  name: scaffold_rdkit
+  presets:
+    train_fraction: 0.7
+    validation_fraction: 0.0
+    test_fraction: 0.3
+  groups_column: Null
+  target_column: "canonical_smiles"

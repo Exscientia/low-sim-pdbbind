@@ -1,0 +1,6 @@
+/models
+/data_download
+/dataset.parquet
+/train.csv
+/test.csv
+/data_dump

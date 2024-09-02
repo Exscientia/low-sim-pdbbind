@@ -1,0 +1,89 @@
+---
+stages:
+  fetch_data:
+    cmd: >
+      python ../../src/low_sim_pdbbind/stages/01_fetch_data.py
+    params:
+      - dataset
+    deps:
+      - ../../src/low_sim_pdbbind/stages/01_fetch_data.py
+    outs:
+      - data/dataset.parquet
+
+  filtering:
+    cmd: >
+      python ../../src/low_sim_pdbbind/stages/02_filtering.py
+    params:
+      - filtering
+      - filtering_nones
+    deps:
+      - ../../src/low_sim_pdbbind/stages/02_filtering.py
+      - data/dataset.parquet
+    outs:
+      - data/dataset_filtered.parquet
+
+  higher_split:
+    cmd: >
+      python ../../src/low_sim_pdbbind/stages/03_higher_split.py
+    params:
+      - higher_split
+    deps:
+      - ../../src/low_sim_pdbbind/stages/03_higher_split.py
+      - data/dataset_filtered.parquet
+    outs:
+      - data/dataset_split/higher_split
+
+  lower_split:
+    cmd: >
+      python ../../src/low_sim_pdbbind/stages/04_lower_split.py
+    params:
+      - lower_split
+    deps:
+      - ../../src/low_sim_pdbbind/stages/04_lower_split.py
+      - data/dataset_split/higher_split
+    outs:
+      - data/dataset_split/lower_split
+
+  featurisation:
+    cmd: >
+      python ../../src/low_sim_pdbbind/pipelines/ligand_only_2d/stages/01_featurise.py
+    params:
+      - featurisation.featurisation_metadata
+      - featurisation.featurisation_name
+      - featurisation.standard_scale
+      - featurisation.normalize
+      - featurisation.num_proc
+      - featurisation.batch_size
+    deps:
+      - ../../src/low_sim_pdbbind/pipelines/ligand_only_2d/stages/01_featurise.py
+      - data/dataset_split/higher_split
+      - data/dataset_split/lower_split
+    outs:
+      - data/dataset_processed/higher_split
+      - data/dataset_processed/lower_split
+
+  train:
+    cmd: >
+      python ../../src/low_sim_pdbbind/stages/05_train.py
+    params:
+      - train.model_config
+    deps:
+      - ../../src/low_sim_pdbbind/stages/05_train.py
+      - data/dataset_processed/higher_split
+      - data/dataset_processed/lower_split
+    outs:
+      - models
+
+  metrics:
+    cmd: >
+      python ../../src/low_sim_pdbbind/stages/06_metrics.py
+    params:
+      - metrics
+    deps:
+      - ../../src/low_sim_pdbbind/stages/06_metrics.py
+      - data/dataset_processed/higher_split
+      - data/dataset_processed/lower_split
+      - models
+    metrics:
+      - metrics:
+          cache: false

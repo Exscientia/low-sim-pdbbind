@@ -1,0 +1,20 @@
+defaults:
+  - _self_
+  - dataset: pdb_bind_bespoke_ccdc
+
+# convenient settings if using Hydra CLI outside of DVC
+hydra:
+  searchpath:
+    - pkg://low_sim_pdbbind.config
+  output_subdir: null
+  job:
+    chdir: false
+
+key: pdb_code
+
+higher_split:
+  name: by_column
+  presets:
+    column: by_bespoke_0_fold_0
+
+model_repo: rfscore

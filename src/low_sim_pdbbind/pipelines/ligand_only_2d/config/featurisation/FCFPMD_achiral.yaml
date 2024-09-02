@@ -1,0 +1,79 @@
+# @package _global_
+---
+featurisation:
+  featurisation_name: FCFPMD_achiral
+  num_proc: 1
+  batch_size: 1000
+  standard_scale: true
+  normalize:
+    - x_log_p_false
+    - aromatic_ring_count_false
+    - molecular_weight_false
+    - num_acceptors_false
+    - num_donors_false
+    - rotatable_bonds_false
+    - tpsa_false
+  x_features:
+    - x_log_p_false::normalized
+    - aromatic_ring_count_false::normalized
+    - molecular_weight_false::normalized
+    - num_acceptors_false::normalized
+    - num_donors_false::normalized
+    - rotatable_bonds_false::normalized
+    - tpsa_false::normalized
+    - fcfp_achiral
+  featurisation_metadata:
+    version: 1
+    config:
+      - column: ${dataset.smiles_column}
+        representations:
+        - as: x_log_p_false
+          config:
+            tag: x_log_p_false
+          name: x_log_p
+          presets:
+            digitise: false
+        - as: aromatic_ring_count_false
+          config:
+            tag: aromatic_ring_count_false
+          name: aromatic_ring_count
+          presets:
+            digitise: false
+        - as: molecular_weight_false
+          config:
+            tag: molecular_weight_false
+          name: molecular_weight
+          presets:
+            digitise: false
+        - as: num_acceptors_false
+          config:
+            tag: num_acceptors_false
+          name: num_acceptors
+          presets:
+            digitise: false
+        - as: num_donors_false
+          config:
+            tag: num_donors_false
+          name: num_donors
+          presets:
+            digitise: false
+        - as: rotatable_bonds_false
+          config:
+            tag: rotatable_bonds_false
+          name: rotatable_bonds
+          presets:
+            digitise: false
+        - as: tpsa_false
+          config:
+            tag: tpsa_false
+          name: tpsa
+          presets:
+            digitise: false
+        - as: fcfp_achiral
+          config:
+            tag: fcfp_achiral
+          name: morgan
+          presets:
+            use_features: true
+            use_chirality: false
+            n_bits: 2048

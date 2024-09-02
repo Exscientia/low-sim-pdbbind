@@ -1,0 +1,75 @@
+---
+model_config:
+  name: multi_graph_egnn_model
+  presets:
+    internal_validation_split:
+      name: shuffle_split
+      presets:
+        train_fraction: 0.8
+        validation_fraction: 0.2
+        test_fraction: 0.0
+  config:
+    tag: plain_multi_graph_egnn_model
+    x_features: ${featurisation.x_features}
+    y_features: ${dataset.y_features}
+    num_node_feats: ${featurisation.num_node_feats}
+    num_edge_feats: ${featurisation.num_edge_feats}
+    graph_names:
+      - ligand
+      - pocket
+    c_hidden: 128
+    num_layers: 5
+    num_layers_phi: 2
+    num_rbf: 8
+    jitter: null
+    pool_type: sum
+    pooling_head: InvariantLigandPocketPoolingHead
+    mlp_activation: SiLU
+    scaling_mean: 6.35
+    scaling_std: 1.86
+    y_graph_scalars_loss_config:
+      name: MSELoss
+    optimizer:
+      name: AdamW
+      config:
+        lr: 0.0005
+    scheduler:
+      name: ReduceLROnPlateau
+      config:
+        factor: 0.8
+        patience: 50
+      monitor: val/total/loss
+      interval: epoch
+    datamodule:
+      y_graph_scalars: ${dataset.y_features}
+      num_elements: 41
+      cut_off: 5.0
+      train:
+        batch_size: 32
+      validation:
+        batch_size: 32
+      predict:
+        batch_size: 32
+      num_workers: 2
+      pre_batch: on_disk
+    trainer:
+      accelerator: auto
+      strategy: auto
+      devices: 1
+      max_epochs: 1000
+      enable_checkpointing: true
+      gradient_clip_val: 20
+      gradient_clip_algorithm: norm
+      callbacks:
+        - name: LearningRateMonitor
+        - name: EarlyStopping
+          config:
+            monitor: val/total/loss
+            patience: 100
+            mode: min
+        - name: ModelCheckpointApply
+          config:
+            monitor: val/total/loss
+            save_last: true
+            save_top_k: 1
+

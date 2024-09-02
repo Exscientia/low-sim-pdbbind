@@ -1,0 +1,11 @@
+[core]
+autostage = true
+remote = storage
+
+[hydra]
+enabled = true
+config_dir = ../../src/low_sim_pdbbind/pipelines/pdb_processing/config
+config_name = main
+
+['remote "storage"']
+url = s3://low_sim_pdbbind--pdb_processing

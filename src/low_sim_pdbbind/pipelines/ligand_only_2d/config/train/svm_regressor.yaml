@@ -1,0 +1,7 @@
+---
+model_config:
+  name: support_vector_regressor
+  config:
+    y_features: ${dataset.y_features}
+    x_features: ${featurisation.x_features}
+    kernel: rbf

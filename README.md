@@ -1,0 +1,132 @@
+# Low-Sim PDBBind
+
+This is the repo for the paper: "Improving generalisability of 3D binding affinity models in low data regimes". The repo include code to reproduce the experiments reported.
+
+## Structure
+
+The repo uses [`molflux`](https://exscientia.github.io/molflux/) and [`physicsml`](https://exscientia.github.io/physicsml/)
+for the model code and [`dvc`](https://dvc.org/doc) for structuring experiments. The repository contains multiple pipelines
+each corresponding to part of the benchmarks.
+
+### Code
+
+The code for running the experiments is under `src` and the stage definitions are under `pipelines`. Apart from the dataset processing,
+the model training pipelines share almost all code which can be found under `src/low_sim_pdbbind/stages`. The code is split into
+6 stages
+* `fetch_data`: Fetches the data from a predefined location
+* `filtering`: Filter part of the data (for example data for a single protein)
+* `higher_split`: The train+validation / test split (sometimes called holdout)
+* `lower_split`: the train / validation split.
+* `train`: Trains the models on all the split folds
+* `metrics`: Computes the metrics on all the split folds.
+
+### Data
+
+The data is available at [zenodo](https://zenodo.org/records/13772124). You can find:
+* `pdbbind_dataset.csv`: The csv file of pdb codes, affinity data, etc.
+* `pdbbind_ccdc_structures.gz`: The prepared structures.
+* `pdbbind_ccdc_lignads.gz`: The prepared ligands.
+* `aln.txt`: The similarity data computed using Foldseek.
+* `qm_egnn`: The pre-trained QM EGNN model
+* `diffusion_egnn`: The pre-trained diffusion EGNN model
+
+### Pipelines
+
+There are 4 pipelines which are defined in the `pipelines` directory.
+* `pdb_processing`: Gets the prepared structures and constructs a dataset. It also filters for similarity and makes the splits.
+* `ligand_only_2d`: Trains the models that use 2d ligand information only (both local and global).
+* `ligand_pocket_3d`: Trains the models which use the 3d ligand and pocket information (The EGNN models).
+* `durant_models`: Trains models from [Durant et al., 2023](https://www.biorxiv.org/content/10.1101/2023.10.30.564251v1.full).
+
+## Setting up the environment
+
+To set up the environment, you can run `./init_conda_venv.sh`. This will set up a conda env with the base dependencies.
+Next, you will need to install the optional dependencies for each pipeline by doing `pip install .[PIPELINE_NAME]`. To install
+the dependencies for all the pipelines, you can do `pip install .[all]`.
+
+## How to run the benchmarks
+
+### Specifying data paths
+
+To run the benchmarks, you need to download the data from [zenodo](https://zenodo.org/records/13772124).
+
+To run the `pdb_processing` pipeline, you need to specify the following paths in the [`src/low_sim_pdbbind/pipelines/pdb_processing/config/main.yaml`](src/low_sim_pdbbind/pipelines/pdb_processing/config/main.yaml)
+file to
+* `pdbbind_dataset_path` to point to `pdbbind_dataset.csv`
+* `structures_path` to point to the unzipped `pdbbind_ccdc_structures`
+* `ligands_path` to point to the unzipped `pdbbind_ccdc_ligands`
+* `path_to_foldseek_aln` to point to `aln.txt`
+
+To run the `ligand_pocket_3d` pipeline with the pre-trained models, you need to specify the paths to the pre-trained models.
+
+For the QM pre-trained model, you need to specify `model_config.config.transfer_learning.pre_trained_model_path` to point to
+`qm_egnn` in these files `src/low_sim_pdbbind/pipelines/ligand_pocket_3d/config/train/*_pre_trained_qm.yaml`
+
+For the diffusion pre-trained model, you need to specify `model_config.config.transfer_learning.pre_trained_model_path` to point to
+`diffusion_egnn` in these files `src/low_sim_pdbbind/pipelines/ligand_pocket_3d/config/train/*_pre_trained_diffusion.yaml`
+
+Make sure all paths you specify are absolute paths! (no `~`!)
+
+### Running the pipelines
+
+Each pipeline has pre-defined configs which can be found in `src/low_sim_pdbbind/pipelines/*/configs`. The shared configs
+can be found in `src/low_sim_pdbbind/configs` (for the dataset and the splits).
+
+The default settings for each pipeline can be run by executing `dvc exp run` in the directory of that pipeline found under `pipelines/*/`.
+To override the default params with any configs, you can follow `dvc` convention and do `dvc exp run -S param_name=config_name`. Each
+pipeline has an `hpo.sh` script which does a grid search over the available parameters.
+
+#### Running the `pdb_processing` pipeline
+```bash
+cd pipelines/pdb_processing/
+dvc exp run
+```
+The command above should create following data in the directory:
+- `data/data_processed.parquet`
+- `data/dataset_high_split.parquet`
+
+The data stored in `data/dataset_high_split.parquet` is the input-data of the other pipelines.
+
+#### Running the `ligand_only_2d` pipeline
+
+Make sure you installed the pipeline-specific dependencies with: `pip install .[ligand_only_2d]`
+
+
+The path to the processed and split dataset (`pipelines/pdb_processing/data/dataset_high_split.parquet`) generated by the `pdb_processing`-pipeline
+is already set in the dataset config
+`src/low_sim_pdbbind/config/dataset/pdb_bind_bespoke_ccdc.yaml`.
+
+You can run a single ligand-only-2d experiment:
+```bash
+cd pipelines/ligand_only_2d/
+dvc exp run -S dataset=pdb_bind_bespoke_ccdc -S filtering=uniprot_id -S filtering.0.value=O60885 -S higher_split.presets.columns=[by_bespoke_5_fold_0,by_bespoke_5_fold_1,by_bespoke_5_fold_2] -S featurisation=ECFPMD -S train=catboost_regressor
+```
+
+To run the full grid search:
+```bash
+cd pipelines/ligand_only_2d/
+./hpo.sh
+```
+This will sequentially run all dvc-commands to iterate over datasets, features and models.
+
+## Analysing results
+
+Once you have run the experiments, you can aggregate the results using the `results_summary.ipynb` notebook for each pipeline. Start
+by exporting the dvc experiments. In the pipeline directory (and using the commit hash of the commit from which the experiments were run), run
+
+* `dvc exp show --rev <commit hash> --csv > summary.csv`
+
+This will generate a `csv` with all the experiments. You can then run the respective `results_summary.ipynb` notebook which will produce
+an aggregated results summary.
+
+### Overview on models in the pipelines
+
+| model          | pipeline name | implementation source | reference                       |
+|----------------| - | - |---------------------------------|
+| EGNN           | `ligand_pocket_3d` | own | [Satorras et al., 2022]         |
+| EGNN-QM        | `ligand_pocket_3d` | own |                                 |
+| EGNN-diffusion | `ligand_pocket_3d` | own |                                 |
+| RF-Score       | `durant_models` | https://github.com/guydurant/toolboxsf| [Ballester and Mitchell, 2010] |
+| OnionNet-2     | `durant_models` | reimplemented | [Wang et al., 2021]             |
+| single-protein | `ligand_only_2d` | own |                                 |
+

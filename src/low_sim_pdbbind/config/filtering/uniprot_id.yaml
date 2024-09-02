@@ -1,0 +1,9 @@
+# @package _global_
+---
+
+filtering:
+  - column_name: uniprot_id
+    value: P00918
+
+filtering_nones:
+  - column_name: ligand_bytes

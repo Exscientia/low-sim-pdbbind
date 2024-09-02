@@ -1,0 +1,16 @@
+/dataset_processed.parquet
+/dataset_high_split
+/dataset_lower_split
+/dataset_lower_split_combined
+/dataset_lower_split_featurised
+/dataset_high_split_combined
+/dataset_high_split_featurised
+/pdb_bind_data.parquet
+/pdb_selected_with_split_tags.csv
+/dataset.parquet
+/dataset_filtered.parquet
+/dataset_processed
+/input_to_model
+/models
+/dataset_split
+/dataset_high_split

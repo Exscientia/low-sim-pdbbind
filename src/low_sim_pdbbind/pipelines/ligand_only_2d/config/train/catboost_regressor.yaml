@@ -1,0 +1,7 @@
+---
+model_config:
+  name: cat_boost_regressor
+  config:
+    random_state: 0
+    y_features: ${dataset.y_features}
+    x_features: ${featurisation.x_features}

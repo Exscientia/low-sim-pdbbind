@@ -1,0 +1,4 @@
+/dataset_high_split.parquet
+/dataset_processed.parquet
+/aln.txt
+/pdb_families.csv

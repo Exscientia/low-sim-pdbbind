@@ -1,0 +1,19 @@
+defaults:
+  - _self_
+  # disable Hydra's logging if using Hydra CLI outside of DVC
+  - override hydra/hydra_logging: disabled
+  - override hydra/job_logging: disabled
+
+# convenient settings if using Hydra CLI outside of DVC
+hydra:
+  output_subdir: null
+  job:
+    chdir: false
+
+pdbbind_dataset_path: pdbbind_dataset.csv  # Define Path
+ligands_path: ligands  # Define Path
+structures_path: structures  # Define Path
+
+uniprot_ids_benchmarking: ['O60885', 'P00734', 'P00760', 'P00918', 'P07900', 'P24941', 'P56817', 'Q9H2K2']
+SIM_THRESH: 0.5
+path_to_foldseek_aln: aln.txt  # Define Path

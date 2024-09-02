@@ -1,0 +1,12 @@
+# @package _global_
+---
+
+higher_split:
+  name: by_column
+  groups_column:
+  target_column:
+  presets:
+    columns:
+      - by_bespoke_5_fold_0
+      - by_bespoke_5_fold_1
+      - by_bespoke_5_fold_2

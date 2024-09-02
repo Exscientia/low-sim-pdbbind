@@ -1,0 +1,12 @@
+# @package _global_
+---
+
+lower_split:
+  name: shuffle_split
+  presets:
+    train_fraction: 0.8
+    validation_fraction: 0.2
+    test_fraction: 0.0
+    n_splits: 1
+  groups_column:
+  target_column:

@@ -1,0 +1,26 @@
+---
+stages:
+  data_processing:
+    cmd: >
+      python ../../src/low_sim_pdbbind/pipelines/pdb_processing/stages/01_process_data.py
+    params:
+      - pdbbind_dataset_path
+      - ligands_path
+      - structures_path
+    deps:
+      - ../../src/low_sim_pdbbind/pipelines/pdb_processing/stages/01_process_data.py
+    outs:
+      - data/dataset_processed.parquet
+
+  high_split:
+    cmd: >
+      python ../../src/low_sim_pdbbind/pipelines/pdb_processing/stages/02_high_split_data.py
+    params:
+      - uniprot_ids_benchmarking
+      - path_to_foldseek_aln
+      - SIM_THRESH
+    deps:
+      - ../../src/low_sim_pdbbind/pipelines/pdb_processing/stages/02_high_split_data.py
+      - data/dataset_processed.parquet
+    outs:
+      - data/dataset_high_split.parquet

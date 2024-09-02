@@ -1,0 +1,43 @@
+---
+stages:
+  get_data:
+    cmd: >
+      python ../../src/low_sim_pdbbind/pipelines/durant_models/stages/get_data.py
+    deps:
+      - ../../src/low_sim_pdbbind/pipelines/durant_models/stages/get_data.py
+    params:
+      - dataset
+      - key
+    outs:
+      - data/data_dump
+      - data/dataset.parquet
+  split_data:
+    cmd: >
+      python ../../src/low_sim_pdbbind/pipelines/durant_models/stages/split_data.py
+    deps:
+      - ../../src/low_sim_pdbbind/pipelines/durant_models/stages/split_data.py
+      - data/dataset.parquet
+    params:
+      - higher_split
+      - key
+    outs:
+      - data/train.csv
+      - data/test.csv
+  train:
+    cmd: >
+      python ../../src/low_sim_pdbbind/pipelines/durant_models/${model_repo}/train_wrapper.py --train --csv_file data/train.csv --data_dir data/data_dump --model_name trained_model;
+    deps:
+      - ../../src/low_sim_pdbbind/pipelines/durant_models/${model_repo}/train_wrapper.py
+    params:
+      - model_repo
+    outs:
+      - data/models
+
+  test:
+    cmd: >
+      python ../../src/low_sim_pdbbind/pipelines/durant_models/${model_repo}/train_wrapper.py --predict --val_csv_file data/test.csv --val_data_dir data/data_dump --model_name trained_model;
+    deps:
+      - data/models
+    metrics:
+      - data/results:
+          cache: false

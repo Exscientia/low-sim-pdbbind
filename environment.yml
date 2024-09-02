@@ -1,0 +1,7 @@
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+- python=3.11
+- pip>=21.0
+- six

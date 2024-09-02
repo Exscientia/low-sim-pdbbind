@@ -1,0 +1,18 @@
+defaults:
+  - _self_
+  - dataset: pdb_bind_bespoke_ccdc
+  - filtering: no_filtering
+  - higher_split: by_column
+  - lower_split: shuffle_split
+  - featurisation: atomic_num_only
+  - train: egnn_pre_trained_qm
+
+# convenient settings if using Hydra CLI outside of DVC
+hydra:
+  searchpath:
+    - pkg://low_sim_pdbbind.config
+  output_subdir: null
+  job:
+    chdir: false
+
+metrics: regression

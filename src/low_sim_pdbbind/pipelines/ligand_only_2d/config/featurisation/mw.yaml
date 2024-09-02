@@ -1,0 +1,22 @@
+# @package _global_
+---
+featurisation:
+  featurisation_name: mw
+  num_proc: 1
+  batch_size: 1000
+  standard_scale: true
+  normalize:
+    - molecular_weight_false
+  x_features:
+    - molecular_weight_false::normalized
+  featurisation_metadata:
+    version: 1
+    config:
+      - column: ${dataset.smiles_column}
+        representations:
+        - as: molecular_weight_false
+          config:
+            tag: molecular_weight_false
+          name: molecular_weight
+          presets:
+            digitise: false

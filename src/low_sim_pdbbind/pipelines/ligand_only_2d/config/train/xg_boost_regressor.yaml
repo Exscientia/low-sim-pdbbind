@@ -1,0 +1,9 @@
+---
+model_config:
+  config:
+    y_features: ${dataset.y_features}
+    x_features: ${featurisation.x_features}
+    learning_rate: 0.2
+    subsample: 1
+    max_depth: 6
+  name: xg_boost_regressor

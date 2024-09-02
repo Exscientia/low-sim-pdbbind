@@ -1,0 +1,5 @@
+outs:
+- md5: 25ec73258c804deda9ec3649557aa1eb
+  size: 400286916
+  hash: md5
+  path: aln.txt
